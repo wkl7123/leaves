@@ -52,6 +52,15 @@ func (e *lgEnsemble) predictInner(fvals []float64, nEstimators int, predictions 
 	}
 }
 
+func (e *lgEnsemble) PredictIndex(fvals []float64, nEstimators int, predictions []uint32) {
+	if e.nRawOutputGroups != 1 {
+		panic("not supported yet")
+	}
+	for i := 0; i < nEstimators; i++ {
+		predictions[i] = e.Trees[i].predictNodeIndex(fvals)
+	}
+}
+
 func (e *lgEnsemble) adjustNEstimators(nEstimators int) int {
 	if nEstimators > 0 {
 		nEstimators = util.MinInt(nEstimators, e.NEstimators())

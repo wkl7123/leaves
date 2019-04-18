@@ -19,6 +19,7 @@ type ensembleBaseInterface interface {
 	Name() string
 	adjustNEstimators(nEstimators int) int
 	predictInner(fvals []float64, nEstimators int, predictions []float64, startIndex int)
+	PredictIndex(fvals []float64, nEstimators int, predictions []uint32)
 	resetFVals(fvals []float64)
 }
 
@@ -39,6 +40,14 @@ func (e *Ensemble) predictInnerAndTransform(fvals []float64, nEstimators int, pr
 	}
 }
 
+func (e *Ensemble) predictLeafIndexes(fvals []float64, nEstimators int, predictions []uint32) {
+	if e.Transformation().Type() == transformation.Raw {
+		panic("to do ...")
+	} else {
+		e.PredictIndex(fvals, nEstimators, predictions)
+	}
+}
+
 // PredictSingle calculates prediction for single class model. If ensemble is
 // multiclass, will return quitely 0.0. Only `nEstimators` first estimators
 // (trees in most cases) will be used. If `len(fvals)` is not enough function
@@ -56,6 +65,10 @@ func (e *Ensemble) PredictSingle(fvals []float64, nEstimators int) float64 {
 
 	e.predictInnerAndTransform(fvals, nEstimators, ret[:], 0)
 	return ret[0]
+}
+
+func (e *Ensemble) PredictSingleIndex(fvals []float64, nEstimators int, predictionIndexes []uint32) {
+	e.predictLeafIndexes(fvals, nEstimators, predictionIndexes)
 }
 
 // Predict calculates single prediction for one or multiclass ensembles. Only

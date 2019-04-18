@@ -2,12 +2,13 @@ package leaves
 
 import (
 	"bufio"
+	"fmt"
+	"github.com/dmitryikh/leaves/util"
 	"math"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
-
-	"github.com/dmitryikh/leaves/util"
 )
 
 func TestReadLGTree(t *testing.T) {
@@ -296,4 +297,41 @@ func TestLGEnsembleJSON1tree(t *testing.T) {
 	check([]float64{0.0, 100.0}, 0.4703)
 	check([]float64{0.15, 0.0}, 1.1111)
 	check([]float64{0.15, 11.0}, 1.1111)
+}
+
+func TestEnsemble_PredictSingleIndex(t *testing.T) {
+	// 1. Read model
+	useTransformation := true
+	model, err := LGEnsembleFromFile("/data/app/LightGBM-GBDT-LR/model.txt", useTransformation)
+	if err != nil {
+		panic(err)
+	}
+
+	// 2. Do predictions!
+	fvals := []float64{1, 30, 434534, 3244, 1, 0, 0, 1}
+	//p := model.PredictSingle(fvals, 0)
+	//fmt.Printf("Prediction for %v: %f\n", fvals, p)
+	predictions := make([]float64, 10)
+	e := model.Predict(fvals, 0, predictions)
+	if e != nil {
+		fmt.Println(e)
+	}
+	//fmt.Printf("NEstimators = %d\n", model.NEstimators()) //树的数目
+	//fmt.Printf("NRawOutputGroups = %d\n", model.NRawOutputGroups()) // 类别数目, transform 之前
+	//fmt.Printf("NFeatures = %d\n", model.NFeatures()) //输入特征数目
+	//fmt.Printf("Name = %s\n", model.Name()) //树名
+	//fmt.Printf("NOutputGroups = %d\n", model.NOutputGroups()) //num_class, transform 之后
+	indexes := make([]uint32, model.NEstimators())
+	model.PredictSingleIndex([]float64{0, 1, 63733, 1111, 36112, 0, 0, 1, 1}, model.NEstimators(), indexes)
+	expect := []uint32{5, 4, 1, 5, 9, 5, 12, 4, 12, 10}
+	if !reflect.DeepEqual(indexes, expect) {
+		t.Fatalf("%v is not equal with %v", indexes, expect)
+	}
+
+	model.PredictSingleIndex([]float64{0, 111484, 2058957926, 11388, 0, 0, 0, 0}, model.NEstimators(), indexes) // 2058957926 -> 正在抽奖
+	expect = []uint32{5, 4, 13, 5, 13, 5, 12, 4, 12, 10}
+	if !reflect.DeepEqual(indexes, expect) {
+		t.Fatalf("%v is not equal with %v", indexes, expect)
+	}
+
 }

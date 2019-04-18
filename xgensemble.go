@@ -18,6 +18,10 @@ type xgEnsemble struct {
 	name string
 }
 
+func (e *xgEnsemble) PredictIndex(fvals []float64, nEstimators int, predictions []uint32) {
+	panic("to do")
+}
+
 func (e *xgEnsemble) NEstimators() int {
 	return len(e.Trees) / e.nRawOutputGroups
 }

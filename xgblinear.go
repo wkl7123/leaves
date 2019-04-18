@@ -12,6 +12,10 @@ func (e *xgLinear) NEstimators() int {
 	return 1
 }
 
+func (e *xgLinear) PredictIndex(fvals []float64, nEstimators int, predictions []uint32) {
+	panic("to do")
+}
+
 func (e *xgLinear) NRawOutputGroups() int {
 	return e.nRawOutputGroups
 }
