@@ -3,7 +3,7 @@ package transformation
 import (
 	"fmt"
 
-	"github.com/dmitryikh/leaves/util"
+	"github.com/wkl7123/leaves/util"
 )
 
 type TransformSoftmax struct {

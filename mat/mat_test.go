@@ -2,12 +2,13 @@ package mat
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 
-	"github.com/dmitryikh/leaves/util"
+	"github.com/wkl7123/leaves/util"
 )
 
 func TestDenseMatFromLibsvm(t *testing.T) {
@@ -118,4 +119,20 @@ func TestCSRMatFromLibsvm(t *testing.T) {
 	if !reflect.DeepEqual(mat.ColIndexes, trueColIndexes) {
 		t.Error("mat.ColIndexes are incorrect")
 	}
+}
+
+func TestMat1(t *testing.T) {
+	mat, err := CSRMatFromArray([]float64{1, 2, 3, 4, 5, 6}, 2, 3)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%+v\n", mat)
+}
+
+func TestMat2(t *testing.T) {
+	mat, err := DenseMatFromArray([]float64{1, 2, 3, 4, 5, 6}, 2, 3)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%+v\n", mat)
 }
