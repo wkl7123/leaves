@@ -299,7 +299,9 @@ func LGEnsembleFromReader(reader *bufio.Reader, loadTransformation bool) (*Ensem
 	}
 
 	if err := params.Compare("version", "v2"); err != nil {
-		return nil, err
+		if err := params.Compare("version", "v3"); err != nil {
+			return nil, err
+		}
 	}
 	nClasses, err := params.ToInt("num_class")
 	if err != nil {
@@ -352,23 +354,25 @@ func LGEnsembleFromReader(reader *bufio.Reader, loadTransformation bool) (*Ensem
 		if err != nil {
 			return nil, err
 		}
-		objectiveStruct, err := lgObjectiveParse(objectiveStr)
-		if err != nil {
-			return nil, err
-		}
-		if objectiveStruct.name == "binary" && objectiveStruct.param == "sigmoid" {
-			if objectiveStruct.value != 1 {
-				return nil, fmt.Errorf("got sigmoid with value != 1 (got %d)", objectiveStruct.value)
+		if !strings.HasPrefix(objectiveStr, "regression") { // no transformation for regression
+			objectiveStruct, err := lgObjectiveParse(objectiveStr)
+			if err != nil {
+				return nil, err
 			}
-			transform = &transformation.TransformLogistic{}
-		} else if objectiveStruct.name == "multiclass" && objectiveStruct.param == "num_class" {
-			if objectiveStruct.value != e.nRawOutputGroups {
-				return nil, fmt.Errorf("got multiclass num_class != %d (got %d)", e.nRawOutputGroups, objectiveStruct.value)
+			if objectiveStruct.name == "binary" && objectiveStruct.param == "sigmoid" {
+				if objectiveStruct.value != 1 {
+					return nil, fmt.Errorf("got sigmoid with value != 1 (got %d)", objectiveStruct.value)
+				}
+				transform = &transformation.TransformLogistic{}
+			} else if objectiveStruct.name == "multiclass" && objectiveStruct.param == "num_class" {
+				if objectiveStruct.value != e.nRawOutputGroups {
+					return nil, fmt.Errorf("got multiclass num_class != %d (got %d)", e.nRawOutputGroups, objectiveStruct.value)
+				}
+				transform = &transformation.TransformSoftmax{objectiveStruct.value}
+				// multiclass num_class:13
+			} else {
+				return nil, fmt.Errorf("unknown transformation function '%s'", objectiveStr)
 			}
-			transform = &transformation.TransformSoftmax{objectiveStruct.value}
-			// multiclass num_class:13
-		} else {
-			return nil, fmt.Errorf("unknown transformation function '%s'", objectiveStr)
 		}
 	}
 
