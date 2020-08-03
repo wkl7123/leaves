@@ -302,9 +302,10 @@ func TestLGEnsembleJSON1tree(t *testing.T) {
 func TestEnsemble_PredictSingleIndex(t *testing.T) {
 	// 1. Read model
 	useTransformation := true
-	model, err := LGEnsembleFromFile("/data/app/LightGBM-GBDT-LR/model.txt", useTransformation)
+	path := filepath.Join("testdata", "lg_model.txt")
+	model, err := LGEnsembleFromFile(path, useTransformation)
 	if err != nil {
-		panic(err)
+		t.Fatalf("read lg_model failed")
 	}
 
 	// 2. Do predictions!
